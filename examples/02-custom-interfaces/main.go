@@ -49,34 +49,3 @@ type MyRandomStruct struct {
 	IntArray            []int                        `json:"int_array"`
 	OptionalStringArray []string                     `json:"opt_str_array,omitempty"`
 }
-
-/*
-
-// running this would result in a file with the
-// following content (post formatting)
-
-export type UuidType = string
-export type BigIntType = BigInt
-export type DateType = Date
-
-
-export interface MyCustomInterface {
-  user_id: UuidType
-  username: string
-  created_at: DateType
-  comments?: {
-    comment_id: number
-    value: string
-  }[]
-}
-
-export type ArrayOfMyRandomStructs = MyRandomStruct[]
-
-export interface MyRandomStruct {
-  MyFloat: number
-  MyInterface: any
-  ex_1: { [key: string]: { [key: string]: string } }
-  int_array: number[]
-  opt_str_array?: string[]
-}
-*/
