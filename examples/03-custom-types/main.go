@@ -31,21 +31,3 @@ type User struct {
 	Username  string    `json:"username"`
 	CreatedAt time.Time `json:"created_at"`
 }
-
-/*
-
-// running this would result in a file with the
-// following content (post formatting)
-
-// This is a custom comment in the file
-export type UuidType = string
-export type BigIntType = number
-export type DateType = string
-
-
-export interface MyCustomInterface {
-  user_id: UuidType
-  username: string
-  created_at: DateType
-}
-*/
