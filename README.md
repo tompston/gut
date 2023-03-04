@@ -52,22 +52,29 @@ type Comments []struct {
 <tr><td>
 
 ```go
+package main
+
 import (
+	"fmt"
+	"time"
 	"github.com/google/uuid"
 	"github.com/tompston/gut"
 )
 
 func main() {
+
 	// define which structs you want to convert
 	ex1 := gut.ToTypescript(User{})
 	ex2 := gut.ToTypescript(Comments{})
+	ex3 := gut.ToTypescript(MyRandomStruct{})
 
-	// concat all of them together
+	// concat all of the interfaces together
 	interfaces := fmt.Sprintln(ex1, ex2, ex3)
 
-    // save them to a file
 	if err := gut.GenerateTypescriptInterfaces(
-    "./example.gen.ts", interfaces, gut.DefaultSettings); err != nil {
+		"./example.gen.ts", 
+		interfaces, 
+		gut.DefaultSettings); err != nil {
 		fmt.Println(err)
 	}
 }
@@ -82,6 +89,14 @@ type User struct {
 type Comments []struct {
 	ID    int    `json:"comment_id"`
 	Value string `json:"value"`
+}
+
+type MyRandomStruct struct {
+	MyFloat             float64
+	MyInterface         interface{}
+	Ex1                 map[string]map[string]string `json:"ex_1"`
+	IntArray            []int                        `json:"int_array"`
+	OptionalStringArray []string                     `json:"opt_str_array,omitempty"`
 }
 ```
 
@@ -117,7 +132,6 @@ export interface MyRandomStruct {
   int_array: number[]
   opt_str_array?: string[]
 }
-
 ```
 
 </td></tr>
