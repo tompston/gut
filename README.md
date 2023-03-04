@@ -220,7 +220,7 @@ export interface MyRandomStruct {
 </td></tr>
 </tbody></table>
 
-### Example 3 - Change the predefined typesript type values
+### Example 3 - Change the predefined typescript type values
 
 <table>
 <thead><tr><th>main.go</th><th>example.gen.ts</th></tr></thead>
