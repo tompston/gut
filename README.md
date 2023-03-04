@@ -6,7 +6,7 @@
 
 ```bash
 # go version < 1.17
-go get github.com/tompston/gomarvin
+go get github.com/tompston/gut
 ```
 
 ### Example
@@ -296,6 +296,7 @@ git add .
 git commit -m "gut: first release"
 git tag v0.0.1
 git push origin v0.0.1
+
 
 
  -->
