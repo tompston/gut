@@ -5,9 +5,9 @@
 ### Install
 
 ```bash
-
+# go version < 1.17
+go get github.com/tompston/gomarvin
 ```
-
 
 ### Example
 
@@ -291,5 +291,10 @@ export interface MyCustomInterface {
 
 go mod init github.com/tompston/gut
 
+
+git add .
+git commit -m "gut: first release"
+git tag v0.1.0
+git push origin v0.0.1
 
  -->
