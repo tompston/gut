@@ -202,7 +202,6 @@ func TestTypescriptCodegen(t *testing.T) {
 		},
 		{
 			generated_interface: Convert(StructWithInlinedFields{}),
-			// Use custom array type name, if it's provided
 			expected_interface: `
 			export interface StructWithInlinedFields {
 				start_time : DateType
@@ -218,6 +217,47 @@ func TestTypescriptCodegen(t *testing.T) {
 					updated_at : DateType
 			  	}
 			  }`,
+		},
+		{
+			generated_interface: Convert(GenericWithAnObject{}),
+			expected_interface: `
+			export interface GenericWithAnObject {
+				some_field: string
+				areas: { [key: string]: any }
+			}`,
+		},
+		{
+			generated_interface: Convert(GenericWithAnArray{}),
+			expected_interface: `
+			export interface GenericWithAnArray {
+				some_field: string
+				areas: string[]
+			}`,
+		},
+		{
+			generated_interface: Convert(GenericInsideGeneric{}),
+			expected_interface: `
+			export interface GenericInsideGeneric {
+				some_field: string
+				areas: {
+				  some_field: string
+				  areas: { [key: string]: any }
+				}
+			}`,
+		},
+		{
+			generated_interface: Convert(GenericInsideGenericInsideGeneric{}),
+			expected_interface: `
+			export interface GenericInsideGenericInsideGeneric {
+				some_field: string
+				areas: {
+				  some_field: string
+				  areas: {
+					some_field: string
+					areas: { [key: string]: any }
+				  }
+				}
+			}`,
 		},
 	}
 
