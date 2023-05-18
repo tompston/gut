@@ -4,14 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/tompston/gut"
 )
 
 func main() {
 
-	// Insetad of generating an interface called User,
-	// create one with a custom name
 	ex1 := gut.Convert(MyStruct{}, gut.Type{Name: "MyCustomInterface"})
 
 	if err := gut.GenerateTypescriptInterfaces(
@@ -25,10 +22,11 @@ func main() {
 	}
 }
 
-type User struct {
-	ID        uuid.UUID `json:"user_id"`
-	Username  string    `json:"username"`
-	CreatedAt time.Time `json:"created_at"`
+type MyStruct struct {
+	MyEmbeddedStruct  `json:",inline"`
+	NotEmbeddedStruct `json:"not_embedded_struct"`
+	CustomField       int
+	StructWhichHasEmbeddedStructs
 }
 
 type MyEmbeddedStruct struct {
@@ -42,8 +40,6 @@ type NotEmbeddedStruct struct {
 	SomeMoreStuff   map[string]interface{}
 }
 
-type MyStruct struct {
-	MyEmbeddedStruct  `json:",inline"`
-	NotEmbeddedStruct `json:"not_embedded_struct"`
-	CustomField       int
+type StructWhichHasEmbeddedStructs struct {
+	MyEmbeddedStruct `json:",inline"`
 }

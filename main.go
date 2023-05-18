@@ -49,7 +49,12 @@ type Type struct {
 }
 
 // toTS converts the passed down type to the corresponding typescript interface type.
-func toTS(typ r.Type, typeMap map[string]r.Type) string {
+func toTS(typ r.Type, typeMap map[string]r.Type, isInlined ...bool) string {
+
+	var isInline bool
+	if len(isInlined) > 0 && isInlined[0] {
+		isInline = true
+	}
 
 	switch typ.Kind() {
 
@@ -61,7 +66,10 @@ func toTS(typ r.Type, typeMap map[string]r.Type) string {
 		}
 
 		sb := strings.Builder{}
-		sb.WriteString(" {\n")
+
+		if !isInline {
+			sb.WriteString(" {\n")
+		}
 
 		if typ == r.TypeOf(time.Time{}) {
 			return "DateType"
@@ -75,7 +83,12 @@ func toTS(typ r.Type, typeMap map[string]r.Type) string {
 
 			sb.WriteString(fmt.Sprintf("%v: %v\n", typescriptFieldname(field), toTS(field.Type, typeMap)))
 		}
-		sb.WriteString("}")
+
+		if !isInline {
+			sb.WriteString("}")
+		}
+
+		// sb.WriteString("}")
 		return sb.String()
 
 	case r.Slice:
@@ -156,9 +169,8 @@ func parseStruct(structType r.Type, structTypes map[string]r.Type, interface_set
 
 	for i := 0; i < structType.NumField(); i++ {
 		field := structType.Field(i)
-
-		if strings.Contains(field.Tag.Get("json"), ",inline") {
-			buffer.WriteString(fmt.Sprintf("  %s\n", toTS(field.Type, structTypes)))
+		if isInlined(field) {
+			buffer.WriteString(fmt.Sprintf("  %s\n", toTS(field.Type, structTypes, true)))
 		} else {
 			buffer.WriteString(fmt.Sprintf("  %s: %s\n", typescriptFieldname(field), toTS(field.Type, structTypes)))
 		}
@@ -167,6 +179,10 @@ func parseStruct(structType r.Type, structTypes map[string]r.Type, interface_set
 
 	buffer.WriteString("}\n\n")
 	return buffer.String()
+}
+
+func isInlined(field r.StructField) bool {
+	return strings.Contains(field.Tag.Get("json"), ",inline")
 }
 
 // Convert converts the passed in struct into a typescript interface
@@ -210,15 +226,10 @@ func Convert(i interface{}, typeSettings ...Type) string {
 /* convert the field name into a valid value, based on the json tags */
 func typescriptFieldname(field r.StructField) string {
 	json_tag := field.Tag.Get("json")
-
-	fmt.Println("field name is anon ", field.Anonymous, " where json tag is ", json_tag)
-
 	if json_tag == "" {
 		return field.Name
 	} else if strings.Contains(json_tag, ",omitempty") {
 		return fmt.Sprintf("%v? ", strings.Split(json_tag, ",")[0])
-	} else if strings.Contains(json_tag, ",inline") {
-		return ""
 	} else {
 		return fmt.Sprintf("%v ", strings.Split(json_tag, ",")[0])
 	}
