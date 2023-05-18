@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	ex1 := gut.Convert(MyStruct{}, gut.Type{Name: "MyCustomInterface"})
+	ex1 := gut.Convert(StructWithInlinedFields{})
 
 	if err := gut.GenerateTypescriptInterfaces(
 		"./example.gen.ts", ex1, gut.Settings{
@@ -22,11 +22,11 @@ func main() {
 	}
 }
 
-type MyStruct struct {
-	MyEmbeddedStruct  `json:",inline"`
-	NotEmbeddedStruct `json:"not_embedded_struct"`
-	CustomField       int
-	StructWhichHasEmbeddedStructs
+type StructWithInlinedFields struct {
+	MyEmbeddedStruct              `json:",inline"`
+	NotEmbeddedStruct             `json:"not_embedded_struct"`
+	CustomField                   int
+	StructWhichHasEmbeddedStructs `json:"this_should_hold_start_end_and_updated_at"`
 }
 
 type MyEmbeddedStruct struct {

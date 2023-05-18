@@ -200,6 +200,25 @@ func TestTypescriptCodegen(t *testing.T) {
 			  opt_interface?: any
 			}`,
 		},
+		{
+			generated_interface: Convert(StructWithInlinedFields{}),
+			// Use custom array type name, if it's provided
+			expected_interface: `
+			export interface StructWithInlinedFields {
+				start_time : DateType
+			  	end_time : DateType
+			  	updated_at : DateType
+				not_embedded_struct :  {
+				some_random_field : string
+				SomeMoreStuff: {[key: string]: any}}
+				CustomField: number
+				this_should_hold_start_end_and_updated_at :  {
+					start_time : DateType
+					end_time : DateType
+					updated_at : DateType
+			  	}
+			  }`,
+		},
 	}
 
 	for _, tc := range tests {
