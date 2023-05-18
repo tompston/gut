@@ -95,3 +95,13 @@ type NotEmbeddedStruct struct {
 type StructWhichHasEmbeddedStructs struct {
 	MyEmbeddedStruct `json:",inline"`
 }
+
+type StructWithGeneric[T any] struct {
+	SomeField   string `json:"some_field"`
+	GenericType T      `json:"areas" bson:"areas"`
+}
+
+type GenericWithAnObject StructWithGeneric[map[string]interface{}]
+type GenericWithAnArray StructWithGeneric[[]string]
+type GenericInsideGeneric StructWithGeneric[GenericWithAnObject]
+type GenericInsideGenericInsideGeneric StructWithGeneric[GenericInsideGeneric]
