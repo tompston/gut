@@ -70,7 +70,7 @@ func toTS(typ r.Type, typeMap map[string]r.Type, inline ...bool) string {
 				continue
 			}
 
-			if isInlined(field) {
+			if hasInlineJsonTag(field) {
 				sb.WriteString(fmt.Sprintf("%v\n", toTS(field.Type, typeMap, true)))
 			} else {
 				sb.WriteString(fmt.Sprintf("%v: %v\n", typescriptFieldname(field), toTS(field.Type, typeMap)))
@@ -138,7 +138,7 @@ func parseStruct(structType r.Type, structTypes map[string]r.Type, typeSettings 
 	if len(typeSettings) == 1 {
 		gutType := typeSettings[0]
 		if gutType.Name == "" {
-			gutType.Name = structType.Name()
+			gutType.Name = typeName
 		}
 		if !isValidTypeName(gutType.Name) {
 			panic(fmt.Sprintf("Invalid typescript interface name was provided! %v", gutType.Name))
@@ -160,7 +160,7 @@ func parseStruct(structType r.Type, structTypes map[string]r.Type, typeSettings 
 	buffer.WriteString(fmt.Sprintf("export interface %s {\n", typeName))
 	for i := 0; i < structType.NumField(); i++ {
 		field := structType.Field(i)
-		if isInlined(field) {
+		if hasInlineJsonTag(field) {
 			buffer.WriteString(fmt.Sprintf("  %s\n", toTS(field.Type, structTypes, true)))
 		} else {
 			buffer.WriteString(fmt.Sprintf("  %s: %s\n", typescriptFieldname(field), toTS(field.Type, structTypes)))
@@ -172,7 +172,7 @@ func parseStruct(structType r.Type, structTypes map[string]r.Type, typeSettings 
 	return buffer.String()
 }
 
-func isInlined(field r.StructField) bool {
+func hasInlineJsonTag(field r.StructField) bool {
 	return strings.Contains(field.Tag.Get("json"), ",inline")
 }
 
@@ -216,12 +216,13 @@ func Convert(i interface{}, typeSettings ...Type) string {
 /* convert the field name into a valid value, based on the json tags */
 func typescriptFieldname(field r.StructField) string {
 	json_tag := field.Tag.Get("json")
+	tag_name := strings.Split(json_tag, ",")[0]
 	if json_tag == "" {
 		return field.Name
 	} else if strings.Contains(json_tag, ",omitempty") {
-		return fmt.Sprintf("%v? ", strings.Split(json_tag, ",")[0])
+		return fmt.Sprintf("%v? ", tag_name)
 	} else {
-		return fmt.Sprintf("%v ", strings.Split(json_tag, ",")[0])
+		return fmt.Sprintf("%v ", tag_name)
 	}
 }
 

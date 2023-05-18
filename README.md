@@ -6,9 +6,9 @@ Handle
 
 - json tags, like `omitempty` and `inline` appropriately
 - `uuid.UUID` & `time.Time` conversion
-- Type generation for arrays
+- type generation for arrays
 - setting custom names for the generated typescript interfaces
-- Types which use generics (see `examples/5-generic-struct`)
+- types which use generics (see `examples/5-generic-struct`)
 
 ### Install
 
