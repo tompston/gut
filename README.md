@@ -309,6 +309,8 @@ export interface MyCustomInterface {
 
 <!--
 
+// qwe
+
 ## Creating a package
 
 go mod init github.com/tompston/gut
