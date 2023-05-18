@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// Struct that is passed to the GenerateTypescriptInterfaces function,
+// Settings struct is passed to the GenerateTypescriptInterfaces function,
 // in order to specify what types you want to use for the emitted typescript
 // interface fields, when the structs include the following types:
 //   - time.Time
@@ -33,38 +33,27 @@ type Settings struct {
 	BigIntType string
 }
 
-// Optional struct that can be passed to the Convert
-// function, which modifies the generated typescript interfaces
+// Type is an optional struct that can be passed to the Convert function, which modifies the generated typescript interfaces
 type Type struct {
-	// Optional custom name for the generated typescript
-	// interface. (Default = name of the struct )
+	// Optional custom name for the generated typescript interface. (Default = name of the struct )
 	Name string
-	// if set to true, will append a type that will
-	// hold an array of the generated interfaces.
-	// (Default = false)
+	// if set to true, will append a type that will hold an array of the generated interfaces. (Default = false)
 	IsArray bool
-	// optional name for the type that holds the array
-	// of interfaces (default = Name + "Array")
+	// optional name for the type that holds the array of interfaces (default = Name + "Array")
 	ArrayTypeName string
 }
 
 // toTS converts the passed down type to the corresponding typescript interface type.
-func toTS(typ r.Type, typeMap map[string]r.Type, isInlined ...bool) string {
+func toTS(typ r.Type, typeMap map[string]r.Type, inline ...bool) string {
 
 	var isInline bool
-	if len(isInlined) > 0 && isInlined[0] {
+	if len(inline) > 0 && inline[0] {
 		isInline = true
 	}
 
 	switch typ.Kind() {
 
 	case r.Struct:
-
-		isAnon := typ.Name() == ""
-		if isAnon {
-			fmt.Printf("Anonymous struct: %v\n", typ)
-		}
-
 		sb := strings.Builder{}
 
 		if !isInline {
@@ -81,14 +70,16 @@ func toTS(typ r.Type, typeMap map[string]r.Type, isInlined ...bool) string {
 				continue
 			}
 
-			sb.WriteString(fmt.Sprintf("%v: %v\n", typescriptFieldname(field), toTS(field.Type, typeMap)))
+			if isInlined(field) {
+				sb.WriteString(fmt.Sprintf("%v\n", toTS(field.Type, typeMap, true)))
+			} else {
+				sb.WriteString(fmt.Sprintf("%v: %v\n", typescriptFieldname(field), toTS(field.Type, typeMap)))
+			}
 		}
 
 		if !isInline {
 			sb.WriteString("}")
 		}
-
-		// sb.WriteString("}")
 		return sb.String()
 
 	case r.Slice:
@@ -139,25 +130,25 @@ func toTS(typ r.Type, typeMap map[string]r.Type, isInlined ...bool) string {
 	}
 }
 
-func parseStruct(structType r.Type, structTypes map[string]r.Type, interface_settings ...Type) string {
+func parseStruct(structType r.Type, structTypes map[string]r.Type, typeSettings ...Type) string {
 	var buffer bytes.Buffer
 
 	typeName := structType.Name()
 
-	if len(interface_settings) == 1 {
-		_interface := interface_settings[0]
-		if _interface.Name == "" {
-			_interface.Name = structType.Name()
+	if len(typeSettings) == 1 {
+		gutType := typeSettings[0]
+		if gutType.Name == "" {
+			gutType.Name = structType.Name()
 		}
-		if !isValidTypeName(_interface.Name) {
-			panic(fmt.Sprintf("Invalid typescript interface name was provided! %v", _interface.Name))
+		if !isValidTypeName(gutType.Name) {
+			panic(fmt.Sprintf("Invalid typescript interface name was provided! %v", gutType.Name))
 		}
 
 		// set typeName to hold the custom value, if it was provided
-		typeName = _interface.Name
+		typeName = gutType.Name
 
-		if _interface.IsArray {
-			array_type_name := _interface.ArrayTypeName
+		if gutType.IsArray {
+			array_type_name := gutType.ArrayTypeName
 			if array_type_name == "" {
 				array_type_name = fmt.Sprintf("%sArray", typeName)
 			}
@@ -165,8 +156,8 @@ func parseStruct(structType r.Type, structTypes map[string]r.Type, interface_set
 		}
 	}
 
+	// Start of the type
 	buffer.WriteString(fmt.Sprintf("export interface %s {\n", typeName))
-
 	for i := 0; i < structType.NumField(); i++ {
 		field := structType.Field(i)
 		if isInlined(field) {
@@ -204,15 +195,14 @@ func Convert(i interface{}, typeSettings ...Type) string {
 		// create a typescript interface with the settings if the
 		// Interface.Name is present
 		if len(typeSettings) == 1 {
-			_settings := typeSettings[0]
-			_settings.IsArray = true
-			if _settings.Name == "" {
+			settings := typeSettings[0]
+			settings.IsArray = true
+			if settings.Name == "" {
 				panic("The name for the array of structs cannot be empty!")
 			}
-			return parseStruct(_typeof.Elem(), _type, _settings)
+			return parseStruct(_typeof.Elem(), _type, settings)
 		}
-		// else, if the interface is an array, but the settings are not present,
-		// set the IsArray setting to true.
+		// else, if the interface is an array, but the settings are not present, set the IsArray setting to true.
 		return parseStruct(_typeof.Elem(), _type, Type{IsArray: true, Name: _typeof.Name()})
 	}
 	// if the input struct is not an array and the settings are present
