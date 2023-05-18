@@ -17,14 +17,12 @@ func main() {
 	// Generate both the interface for the struct and
 	// also a type which holds an array of interfaces.
 	// + optionally you can also rename it.
-	ex2 := gut.Convert(MyRandomStruct{},
-		gut.Type{IsArray: true, ArrayTypeName: "ArrayOfMyRandomStructs"})
+	ex2 := gut.Convert(MyRandomStruct{}, gut.Type{IsArray: true, ArrayTypeName: "ArrayOfMyRandomStructs"})
 
 	// concat all of the interfaces together
 	interfaces := fmt.Sprintln(ex1, ex2)
 
-	if err := gut.GenerateTypescriptInterfaces(
-		"./example.gen.ts", interfaces, gut.DefaultSettings); err != nil {
+	if err := gut.Generate("./example.gen.ts", interfaces); err != nil {
 		fmt.Println(err)
 	}
 }

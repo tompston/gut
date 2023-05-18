@@ -35,9 +35,7 @@ func main() {
 	// concat all of the interfaces together
 	interfaces := fmt.Sprintln(ex1, ex2, ex3)
 
-	if err := gut.GenerateTypescriptInterfaces(
-		"./example.gen.ts",
-		interfaces, gut.DefaultSettings); err != nil {
+	if err := gut.Generate("./example.gen.ts",interfaces); err != nil {
 		fmt.Println(err)
 	}
 }
@@ -110,6 +108,12 @@ ChatGPT)
 ### Features
 
 - Handle cases when the convertable struct is an array
+
+- Handle json ",omitempty" tags
+- Handle json ",inline" tags (embeded structs)
+  - If a struct has a field with an json ",inline" tag, then the generated
+    typescript interface will have all of the fields from the embeded struct
+    inside of it.
 - handle `uuid.UUID` & `time.Time` conversion
 - Avoid duplicate interface names, by generating only one typescript interface
   which will hold all of the types that are present in the struct.
@@ -126,7 +130,7 @@ ChatGPT)
 - Keep the package simple.
   - `gut` exports only 2 funtions
     - `Convert()` -> converts the struct into a ts string
-    - `GenerateTypescriptInterfaces()` -> save the converted ts interfaces to a
+    - `Generate()` -> save the converted ts interfaces to a
       file + define the settings for the types
 
 ### Disclaimer
@@ -173,8 +177,7 @@ func main() {
 	// concat all of the interfaces together
 	interfaces := fmt.Sprintln(ex1, ex2)
 
-	if err := gut.GenerateTypescriptInterfaces(
-		"./example.gen.ts", interfaces, gut.DefaultSettings); err != nil {
+	if err := gut.Generate("./example.gen.ts", interfaces); err != nil {
 		fmt.Println(err)
 	}
 }
@@ -255,7 +258,7 @@ func main() {
 	ex1 := gut.Convert(User{},
 		gut.Type{Name: "MyCustomInterface"})
 
-	if err := gut.GenerateTypescriptInterfaces(
+	if err := gut.Generate(
 		"./example.gen.ts", ex1, gut.Settings{
 			FirstLine:  "// This is a custom comment in the file\n",
 			DateType:   "string",

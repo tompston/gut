@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// Settings struct is passed to the GenerateTypescriptInterfaces function,
+// Settings struct is passed to the Generate function,
 // in order to specify what types you want to use for the emitted typescript
 // interface fields, when the structs include the following types:
 //   - time.Time
@@ -233,17 +233,25 @@ var DefaultSettings = Settings{
 	BigIntType: "BigInt",
 }
 
-// GenerateTypescriptInterfaces function creates a file
-// and saves the passed in content to it + appends
-// the settings types at the start.
-func GenerateTypescriptInterfaces(filename string, content string, settings Settings) error {
+// Generate function creates a file  and saves the passed in content to it + appends
+// the settings types at the start. If the 3rd optional param is present, it will be used
+// to override the default settings.
+func Generate(filename string, content string, settings ...Settings) error {
+	// if the settings are not present, use the default settings, else use the provided settings
+	var s Settings
+	if len(settings) == 1 {
+		s = settings[0]
+	} else {
+		s = DefaultSettings
+	}
+
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	head_and_interfaces := fmt.Sprintln(createHeader(settings), content)
+	head_and_interfaces := fmt.Sprintln(createHeader(s), content)
 	_, err = file.Write([]byte(head_and_interfaces))
 	if err != nil {
 		return err

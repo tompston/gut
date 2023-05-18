@@ -12,8 +12,7 @@ func main() {
 	ex2 := gut.Convert(GenericWithAnArray{})
 	ex3 := gut.Convert(GenericInsideGeneric{})
 
-	if err := gut.GenerateTypescriptInterfaces(
-		"./example.gen.ts", fmt.Sprintln(ex1, ex2, ex3), gut.Settings{}); err != nil {
+	if err := gut.Generate("./example.gen.ts", fmt.Sprintln(ex1, ex2, ex3)); err != nil {
 		fmt.Println(err)
 	}
 }

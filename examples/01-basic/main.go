@@ -18,9 +18,9 @@ func main() {
 	// concat all of the interfaces together
 	interfaces := fmt.Sprintln(ex1, ex2, ex3)
 
-	if err := gut.GenerateTypescriptInterfaces(
+	if err := gut.Generate(
 		"./example.gen.ts",
-		interfaces, gut.DefaultSettings); err != nil {
+		interfaces); err != nil {
 		fmt.Println(err)
 	}
 }

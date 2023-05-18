@@ -15,7 +15,7 @@ func main() {
 	ex1 := gut.Convert(User{},
 		gut.Type{Name: "MyCustomInterface"})
 
-	if err := gut.GenerateTypescriptInterfaces(
+	if err := gut.Generate(
 		"./example.gen.ts", ex1, gut.Settings{
 			FirstLine:  "// This is a custom comment in the file\n",
 			DateType:   "string",
