@@ -316,9 +316,9 @@ export interface MyCustomInterface {
 go mod init github.com/tompston/gut
 
 git add .
-git commit -m "gut: v0.0.3 relase - add support for inline structs and generics"
-git tag v0.0.3
-git push origin v0.0.3
+git commit -m "gut: v0.0.4 relase - add support for inline structs and generics"
+git tag v0.0.4
+git push origin v0.0.4
 
 
  -->
