@@ -1,5 +1,7 @@
 package gut
 
+// go test . -v -count=1
+
 import (
 	"strings"
 	"testing"

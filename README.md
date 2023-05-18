@@ -1,6 +1,14 @@
 # gut
 
-> Convert Golang structs to Typescript interfaces in ~300 loc
+> Convert Golang structs to Typescript interfaces
+
+Handle
+
+- json tags, like `omitempty` and `inline` appropriately
+- `uuid.UUID` & `time.Time` conversion
+- Type generation for arrays
+- setting custom names for the generated typescript interfaces
+- Types which use generics (see `examples/5-generic-struct`)
 
 ### Install
 
@@ -105,6 +113,12 @@ found that the current packages which try to do this had bugs and did not have
 the features I wanted. So I had to write it from scratch (with some help from
 ChatGPT)
 
+### Test
+
+```bash
+go test . -v -count=1
+```
+
 ### Features
 
 - Handle cases when the convertable struct is an array
@@ -113,7 +127,7 @@ ChatGPT)
 - Handle json ",inline" tags (embeded structs)
   - If a struct has a field with an json ",inline" tag, then the generated
     typescript interface will have all of the fields from the embeded struct
-    inside of it.
+    inside of it. (see `examples/4-struct-with-inline`)
 - handle `uuid.UUID` & `time.Time` conversion
 - Avoid duplicate interface names, by generating only one typescript interface
   which will hold all of the types that are present in the struct.
@@ -136,7 +150,6 @@ ChatGPT)
 ### Disclaimer
 
 - The generated TS code is not formatted. Maybe I'll fix this later. The current way to format can be done by using `deno fmt .`
-- Won't do any golang interface -> typescript conversion.
 - There might be bugs.
 
 ### Credits
