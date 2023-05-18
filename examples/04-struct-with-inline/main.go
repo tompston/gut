@@ -7,6 +7,7 @@ import (
 	"github.com/tompston/gut"
 )
 
+// go run examples/04-struct-with-inline/main.go
 func main() {
 
 	ex1 := gut.Convert(StructWithInlinedFields{})
