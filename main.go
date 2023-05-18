@@ -66,7 +66,22 @@ func toTS(typ r.Type, typeMap map[string]r.Type) string {
 			if field.PkgPath != "" { // Skip unexported fields
 				continue
 			}
-			sb.WriteString(fmt.Sprintf("%v: %v\n", typescriptFieldname(field), toTS(field.Type, typeMap)))
+			// if field.Anonymous {
+			// 	sb.WriteString(fmt.Sprintf("qweqwe %v", toTS(field.Type, typeMap)))
+			// } else {
+			// 	sb.WriteString(fmt.Sprintf("%v: %v\n", typescriptFieldname(field), toTS(field.Type, typeMap)))
+			// }
+
+			if field.Anonymous {
+				// Recursively call `toTS` on the anonymous struct
+				anonType := toTS(field.Type, typeMap)
+				sb.WriteString(fmt.Sprintf("%v\n", anonType))
+			} else {
+				sb.WriteString(fmt.Sprintf("%v: %v\n", typescriptFieldname(field), toTS(field.Type, typeMap)))
+			}
+
+			// sb.WriteString(fmt.Sprintf("%v: %v\n", typescriptFieldname(field), toTS(field.Type, typeMap)))
+
 		}
 		sb.WriteString("}")
 		return sb.String()
@@ -197,10 +212,15 @@ func Convert(i interface{}, typeSettings ...Type) string {
 /* convert the field name into a valid value, based on the json tags */
 func typescriptFieldname(field r.StructField) string {
 	json_tag := field.Tag.Get("json")
+
+	fmt.Println("field name is anon ", field.Anonymous, " where json tag is ", json_tag)
+
 	if json_tag == "" {
 		return field.Name
 	} else if strings.Contains(json_tag, ",omitempty") {
 		return fmt.Sprintf("%v? ", strings.Split(json_tag, ",")[0])
+	} else if strings.Contains(json_tag, ",inline") {
+		return ""
 	} else {
 		return fmt.Sprintf("%v ", strings.Split(json_tag, ",")[0])
 	}
