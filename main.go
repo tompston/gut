@@ -54,6 +54,12 @@ func toTS(typ r.Type, typeMap map[string]r.Type) string {
 	switch typ.Kind() {
 
 	case r.Struct:
+
+		isAnon := typ.Name() == ""
+		if isAnon {
+			fmt.Printf("Anonymous struct: %v\n", typ)
+		}
+
 		sb := strings.Builder{}
 		sb.WriteString(" {\n")
 
@@ -66,22 +72,8 @@ func toTS(typ r.Type, typeMap map[string]r.Type) string {
 			if field.PkgPath != "" { // Skip unexported fields
 				continue
 			}
-			// if field.Anonymous {
-			// 	sb.WriteString(fmt.Sprintf("qweqwe %v", toTS(field.Type, typeMap)))
-			// } else {
-			// 	sb.WriteString(fmt.Sprintf("%v: %v\n", typescriptFieldname(field), toTS(field.Type, typeMap)))
-			// }
 
-			if field.Anonymous {
-				// Recursively call `toTS` on the anonymous struct
-				anonType := toTS(field.Type, typeMap)
-				sb.WriteString(fmt.Sprintf("%v\n", anonType))
-			} else {
-				sb.WriteString(fmt.Sprintf("%v: %v\n", typescriptFieldname(field), toTS(field.Type, typeMap)))
-			}
-
-			// sb.WriteString(fmt.Sprintf("%v: %v\n", typescriptFieldname(field), toTS(field.Type, typeMap)))
-
+			sb.WriteString(fmt.Sprintf("%v: %v\n", typescriptFieldname(field), toTS(field.Type, typeMap)))
 		}
 		sb.WriteString("}")
 		return sb.String()
@@ -164,7 +156,13 @@ func parseStruct(structType r.Type, structTypes map[string]r.Type, interface_set
 
 	for i := 0; i < structType.NumField(); i++ {
 		field := structType.Field(i)
-		buffer.WriteString(fmt.Sprintf("  %s: %s\n", typescriptFieldname(field), toTS(field.Type, structTypes)))
+
+		if strings.Contains(field.Tag.Get("json"), ",inline") {
+			buffer.WriteString(fmt.Sprintf("  %s\n", toTS(field.Type, structTypes)))
+		} else {
+			buffer.WriteString(fmt.Sprintf("  %s: %s\n", typescriptFieldname(field), toTS(field.Type, structTypes)))
+		}
+
 	}
 
 	buffer.WriteString("}\n\n")

@@ -44,6 +44,6 @@ type NotEmbeddedStruct struct {
 
 type MyStruct struct {
 	MyEmbeddedStruct  `json:",inline"`
-	NotEmbeddedStruct `json:"not_embedded"`
+	NotEmbeddedStruct `json:"not_embedded_struct"`
 	CustomField       int
 }
