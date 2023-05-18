@@ -33,9 +33,9 @@ type Settings struct {
 	BigIntType string
 }
 
-// Optional struct that can be passed to the ToTypescript
+// Optional struct that can be passed to the Convert
 // function, which modifies the generated typescript interfaces
-type Interface struct {
+type Type struct {
 	// Optional custom name for the generated typescript
 	// interface. (Default = name of the struct )
 	Name string
@@ -48,8 +48,7 @@ type Interface struct {
 	ArrayTypeName string
 }
 
-// toTS converts the passed down type to the
-// corresponding typescript interface type.
+// toTS converts the passed down type to the corresponding typescript interface type.
 func toTS(typ r.Type, typeMap map[string]r.Type) string {
 
 	switch typ.Kind() {
@@ -67,7 +66,7 @@ func toTS(typ r.Type, typeMap map[string]r.Type) string {
 			if field.PkgPath != "" { // Skip unexported fields
 				continue
 			}
-			sb.WriteString(fmt.Sprintf("%v: %v\n", fieldName(field), toTS(field.Type, typeMap)))
+			sb.WriteString(fmt.Sprintf("%v: %v\n", typescriptFieldname(field), toTS(field.Type, typeMap)))
 		}
 		sb.WriteString("}")
 		return sb.String()
@@ -120,79 +119,83 @@ func toTS(typ r.Type, typeMap map[string]r.Type) string {
 	}
 }
 
-func parseStruct(structType r.Type, structTypes map[string]r.Type, interface_settings ...Interface) string {
+func parseStruct(structType r.Type, structTypes map[string]r.Type, interface_settings ...Type) string {
 	var buffer bytes.Buffer
 
-	interface_name := structType.Name()
+	typeName := structType.Name()
 
 	if len(interface_settings) == 1 {
 		_interface := interface_settings[0]
 		if _interface.Name == "" {
 			_interface.Name = structType.Name()
 		}
-		if !isValidInterfaceName(_interface.Name) {
+		if !isValidTypeName(_interface.Name) {
 			panic(fmt.Sprintf("Invalid typescript interface name was provided! %v", _interface.Name))
 		}
 
-		// set interface_name to hold the custom value, if it was provided
-		interface_name = _interface.Name
+		// set typeName to hold the custom value, if it was provided
+		typeName = _interface.Name
 
 		if _interface.IsArray {
 			array_type_name := _interface.ArrayTypeName
 			if array_type_name == "" {
-				array_type_name = fmt.Sprintf("%sArray", interface_name)
+				array_type_name = fmt.Sprintf("%sArray", typeName)
 			}
-			buffer.WriteString(fmt.Sprintf("export type %s = %s[] \n\n", array_type_name, interface_name))
+			buffer.WriteString(fmt.Sprintf("export type %s = %s[] \n\n", array_type_name, typeName))
 		}
 	}
 
-	buffer.WriteString(fmt.Sprintf("export interface %s {\n", interface_name))
+	buffer.WriteString(fmt.Sprintf("export interface %s {\n", typeName))
 
 	for i := 0; i < structType.NumField(); i++ {
 		field := structType.Field(i)
-		buffer.WriteString(fmt.Sprintf("  %s: %s\n", fieldName(field), toTS(field.Type, structTypes)))
+		buffer.WriteString(fmt.Sprintf("  %s: %s\n", typescriptFieldname(field), toTS(field.Type, structTypes)))
 	}
 
 	buffer.WriteString("}\n\n")
 	return buffer.String()
 }
 
-// ToTypescript converts the passed in struct into a typescript interface
+// Convert converts the passed in struct into a typescript interface
 // and returns it as a string. The function also allows for the 2nd optional
 // param, which is used to optionally define the settings of the generated
 // typescript interface.
 //
 // Example
 //
-//	ex1 := gut.ToTypescript(MyStruct{})
-//	ex2 := gut.ToTypescript(MyStruct{}, gut.Interface{Name: "MyStructCustomName", IsArray : true})
-func ToTypescript(i interface{}, interface_settings ...Interface) string {
+//	ex1 := gut.Convert(MyStruct{})
+//	ex2 := gut.Convert(MyStruct{}, gut.Type{Name: "MyStructCustomName", IsArray : true})
+func Convert(i interface{}, typeSettings ...Type) string {
+
+	_type := make(map[string]r.Type)
+	_typeof := r.TypeOf(i)
+
 	if structIsArray(i) {
 		// if the input struct is an array and the settings are present,
 		// create a typescript interface with the settings if the
 		// Interface.Name is present
-		if len(interface_settings) == 1 {
-			_settings := interface_settings[0]
+		if len(typeSettings) == 1 {
+			_settings := typeSettings[0]
 			_settings.IsArray = true
 			if _settings.Name == "" {
 				panic("The name for the array of structs cannot be empty!")
 			}
-			return parseStruct(r.TypeOf(i).Elem(), make(map[string]r.Type), _settings)
+			return parseStruct(_typeof.Elem(), _type, _settings)
 		}
 		// else, if the interface is an array, but the settings are not present,
 		// set the IsArray setting to true.
-		return parseStruct(r.TypeOf(i).Elem(), make(map[string]r.Type), Interface{IsArray: true, Name: r.TypeOf(i).Name()})
+		return parseStruct(_typeof.Elem(), _type, Type{IsArray: true, Name: _typeof.Name()})
 	}
 	// if the input struct is not an array and the settings are present
-	if len(interface_settings) == 1 {
-		return parseStruct(r.TypeOf(i), make(map[string]r.Type), interface_settings[0])
+	if len(typeSettings) == 1 {
+		return parseStruct(_typeof, _type, typeSettings[0])
 	}
 	// If the settings array is not present and the struct is not an array
-	return parseStruct(r.TypeOf(i), make(map[string]r.Type))
+	return parseStruct(_typeof, _type)
 }
 
 /* convert the field name into a valid value, based on the json tags */
-func fieldName(field r.StructField) string {
+func typescriptFieldname(field r.StructField) string {
 	json_tag := field.Tag.Get("json")
 	if json_tag == "" {
 		return field.Name
@@ -231,41 +234,6 @@ func GenerateTypescriptInterfaces(filename string, content string, settings Sett
 	return nil
 }
 
-func createHeader(s Settings) string {
-	sb := strings.Builder{}
-
-	// Append first line if exists
-	if s.FirstLine != "" {
-		sb.WriteString(s.FirstLine)
-	}
-
-	// Check for uuid type
-	if s.UuidType == "" {
-		sb.WriteString(fmt.Sprintf("export type UuidType = %s\n", "string"))
-	} else {
-		sb.WriteString(fmt.Sprintf("export type UuidType = %s\n", s.UuidType))
-	}
-
-	// Check for int64/uint64 types
-	if s.BigIntType == "" {
-		sb.WriteString(fmt.Sprintf("export type BigIntType = %s\n", "BigInt"))
-	} else {
-		sb.WriteString(fmt.Sprintf("export type BigIntType = %s\n", s.BigIntType))
-	}
-
-	// Check for time.Time type
-	if s.DateType == "" {
-		sb.WriteString(fmt.Sprintf("export type DateType = %s\n", "Date"))
-	} else {
-		sb.WriteString(fmt.Sprintf("export type DateType = %s\n", s.DateType))
-	}
-
-	// seperate type definitions from the generated interfaces
-	sb.WriteString("\n\n")
-
-	return sb.String()
-}
-
 func structIsArray(v interface{}) bool {
 	rv := r.ValueOf(v)
 	if rv.Kind() != r.Slice {
@@ -278,7 +246,7 @@ func structIsArray(v interface{}) bool {
 }
 
 // Thanks chatGPT
-func isValidInterfaceName(name string) bool {
+func isValidTypeName(name string) bool {
 	// Define a list of TypeScript reserved words
 	reservedWords := []string{
 		"abstract", "as", "async", "await", "break", "case", "catch", "class", "const", "continue",

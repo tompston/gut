@@ -28,9 +28,9 @@ import (
 func main() {
 
 	// define which structs you want to convert
-	ex1 := gut.ToTypescript(User{})
-	ex2 := gut.ToTypescript(Comments{})
-	ex3 := gut.ToTypescript(MyRandomStruct{})
+	ex1 := gut.Convert(User{})
+	ex2 := gut.Convert(Comments{})
+	ex3 := gut.Convert(MyRandomStruct{})
 
 	// concat all of the interfaces together
 	interfaces := fmt.Sprintln(ex1, ex2, ex3)
@@ -120,12 +120,12 @@ ChatGPT)
 - Ability to optionally rename the generated typescript interface to a custom
   name
 - flexibility in exporting the converted go structs from packages
-  - `ToTypescript()` returns a string which holds the generated typescript
+  - `Convert()` returns a string which holds the generated typescript
     interface, thus grouping the structs from multiple packages, concatenating
     them together and then saving them to a single file is quite trivial.
 - Keep the package simple.
   - `gut` exports only 2 funtions
-    - `ToTypescript()` -> converts the struct into a ts string
+    - `Convert()` -> converts the struct into a ts string
     - `GenerateTypescriptInterfaces()` -> save the converted ts interfaces to a
       file + define the settings for the types
 
@@ -161,14 +161,14 @@ func main() {
 
 	// Insetad of generating an interface called User,
 	// create one with a custom name
-	ex1 := gut.ToTypescript(User{},
-		gut.Interface{Name: "MyCustomInterface"})
+	ex1 := gut.Convert(User{},
+		gut.Type{Name: "MyCustomInterface"})
 
 	// Generate both the interface for the struct and
 	// also a type which holds an array of interfaces.
 	// + optionally you can also rename it.
-	ex2 := gut.ToTypescript(MyRandomStruct{},
-		gut.Interface{IsArray: true, ArrayTypeName: "ArrayOfMyRandomStructs"})
+	ex2 := gut.Convert(MyRandomStruct{},
+		gut.Type{IsArray: true, ArrayTypeName: "ArrayOfMyRandomStructs"})
 
 	// concat all of the interfaces together
 	interfaces := fmt.Sprintln(ex1, ex2)
@@ -252,8 +252,8 @@ func main() {
 
 	// Insetad of generating an interface called User,
 	// create one with a custom name
-	ex1 := gut.ToTypescript(User{},
-		gut.Interface{Name: "MyCustomInterface"})
+	ex1 := gut.Convert(User{},
+		gut.Type{Name: "MyCustomInterface"})
 
 	if err := gut.GenerateTypescriptInterfaces(
 		"./example.gen.ts", ex1, gut.Settings{

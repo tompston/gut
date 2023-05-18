@@ -12,14 +12,13 @@ func main() {
 
 	// Insetad of generating an interface called User,
 	// create one with a custom name
-	ex1 := gut.ToTypescript(User{},
-		gut.Interface{Name: "MyCustomInterface"})
+	ex1 := gut.Convert(User{}, gut.Type{Name: "MyCustomInterface"})
 
 	// Generate both the interface for the struct and
 	// also a type which holds an array of interfaces.
 	// + optionally you can also rename it.
-	ex2 := gut.ToTypescript(MyRandomStruct{},
-		gut.Interface{IsArray: true, ArrayTypeName: "ArrayOfMyRandomStructs"})
+	ex2 := gut.Convert(MyRandomStruct{},
+		gut.Type{IsArray: true, ArrayTypeName: "ArrayOfMyRandomStructs"})
 
 	// concat all of the interfaces together
 	interfaces := fmt.Sprintln(ex1, ex2)

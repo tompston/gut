@@ -12,8 +12,8 @@ func main() {
 
 	// Insetad of generating an interface called User,
 	// create one with a custom name
-	ex1 := gut.ToTypescript(User{},
-		gut.Interface{Name: "MyCustomInterface"})
+	ex1 := gut.Convert(User{},
+		gut.Type{Name: "MyCustomInterface"})
 
 	if err := gut.GenerateTypescriptInterfaces(
 		"./example.gen.ts", ex1, gut.Settings{

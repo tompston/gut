@@ -17,14 +17,14 @@ func TestTypescriptCodegen(t *testing.T) {
 	tests := []test{
 		/* Tests on structs ( No settings ) */
 		{
-			generated_interface: ToTypescript(SimpleStruct{}),
+			generated_interface: Convert(SimpleStruct{}),
 			expected_interface: `
 			export interface SimpleStruct {
 				MyString: string
 			}`,
 		},
 		{
-			generated_interface: ToTypescript(SimpleStructWithJsonTags{}),
+			generated_interface: Convert(SimpleStructWithJsonTags{}),
 			expected_interface: `
 			export interface SimpleStructWithJsonTags {
 				my_str: string
@@ -32,7 +32,7 @@ func TestTypescriptCodegen(t *testing.T) {
 			}`,
 		},
 		{
-			generated_interface: ToTypescript(SimpleStructWithTimeFields{}),
+			generated_interface: Convert(SimpleStructWithTimeFields{}),
 			expected_interface: `
 			export interface SimpleStructWithTimeFields {
 				MyString: string
@@ -43,7 +43,7 @@ func TestTypescriptCodegen(t *testing.T) {
 		},
 		{
 			// Check if time.Duration is correctly converted
-			generated_interface: ToTypescript(StructWithTimeDurationField{}),
+			generated_interface: Convert(StructWithTimeDurationField{}),
 			expected_interface: `
 			export interface StructWithTimeDurationField {
 				SomeValue: string
@@ -52,7 +52,7 @@ func TestTypescriptCodegen(t *testing.T) {
 		},
 
 		{
-			generated_interface: ToTypescript(StructWithMultipleTypes{}),
+			generated_interface: Convert(StructWithMultipleTypes{}),
 			expected_interface: `
 			export interface StructWithMultipleTypes {
 				my_str: string
@@ -64,7 +64,7 @@ func TestTypescriptCodegen(t *testing.T) {
 			}`,
 		},
 		{
-			generated_interface: ToTypescript(StructWithReference{}),
+			generated_interface: Convert(StructWithReference{}),
 			expected_interface: `
 			export interface StructWithReference {
 				my_str: string
@@ -80,7 +80,7 @@ func TestTypescriptCodegen(t *testing.T) {
 			}`,
 		},
 		{
-			generated_interface: ToTypescript(StructWithArrayOfReferences{}),
+			generated_interface: Convert(StructWithArrayOfReferences{}),
 			expected_interface: `
 			export interface StructWithArrayOfReferences {
 				arr_of_ref: {
@@ -90,7 +90,7 @@ func TestTypescriptCodegen(t *testing.T) {
 			}`,
 		},
 		{
-			generated_interface: ToTypescript(StructWithUnspecifiedStructName{}),
+			generated_interface: Convert(StructWithUnspecifiedStructName{}),
 			expected_interface: `
 			export interface StructWithUnspecifiedStructName {
 				SomeValue: string
@@ -101,7 +101,7 @@ func TestTypescriptCodegen(t *testing.T) {
 			}`,
 		},
 		{
-			generated_interface: ToTypescript(StructWithMaps{}),
+			generated_interface: Convert(StructWithMaps{}),
 			expected_interface: `
 			export interface StructWithMaps {
 				MyStr: string
@@ -113,7 +113,7 @@ func TestTypescriptCodegen(t *testing.T) {
 			}`,
 		},
 		{
-			generated_interface: ToTypescript(Employees{}),
+			generated_interface: Convert(Employees{}),
 			expected_interface: `
 			export type EmployeesArray = Employees[]
 
@@ -127,21 +127,21 @@ func TestTypescriptCodegen(t *testing.T) {
 		},
 		/* Tests on structs ( with settings ) */
 		{
-			generated_interface: ToTypescript(SimpleStruct{}, Interface{}),
+			generated_interface: Convert(SimpleStruct{}, Type{}),
 			expected_interface: `
 			export interface SimpleStruct {
 				MyString: string
 			}`,
 		},
 		{
-			generated_interface: ToTypescript(SimpleStruct{}, Interface{Name: "_my_custom_name"}),
+			generated_interface: Convert(SimpleStruct{}, Type{Name: "_my_custom_name"}),
 			expected_interface: `
 			export interface _my_custom_name {
 				MyString: string
 			}`,
 		},
 		{
-			generated_interface: ToTypescript(SimpleStruct{}, Interface{Name: "SingleRow", IsArray: true}),
+			generated_interface: Convert(SimpleStruct{}, Type{Name: "SingleRow", IsArray: true}),
 			expected_interface: `
 			export type SingleRowArray = SingleRow[]
 
@@ -150,7 +150,7 @@ func TestTypescriptCodegen(t *testing.T) {
 			}`,
 		},
 		{
-			generated_interface: ToTypescript(SimpleStruct{}, Interface{Name: "SingleRow", IsArray: true, ArrayTypeName: "MyCustomNameForExportedArrayOfSimpleStructs"}),
+			generated_interface: Convert(SimpleStruct{}, Type{Name: "SingleRow", IsArray: true, ArrayTypeName: "MyCustomNameForExportedArrayOfSimpleStructs"}),
 			expected_interface: `
 			export type MyCustomNameForExportedArrayOfSimpleStructs = SingleRow[]
 
@@ -159,7 +159,7 @@ func TestTypescriptCodegen(t *testing.T) {
 			}`,
 		},
 		{
-			generated_interface: ToTypescript(Employees{}, Interface{Name: "EmployeeInterface"}),
+			generated_interface: Convert(Employees{}, Type{Name: "EmployeeInterface"}),
 			expected_interface: `
 			export type EmployeeInterfaceArray = EmployeeInterface[]
 
@@ -172,7 +172,7 @@ func TestTypescriptCodegen(t *testing.T) {
 			}`,
 		},
 		{
-			generated_interface: ToTypescript(Employees{}, Interface{Name: "EmployeeInterface", IsArray: false}),
+			generated_interface: Convert(Employees{}, Type{Name: "EmployeeInterface", IsArray: false}),
 			// If the Struct is array, but interface settings set it to false,
 			// ignore that setting
 			expected_interface: `
@@ -187,7 +187,7 @@ func TestTypescriptCodegen(t *testing.T) {
 			}`,
 		},
 		{
-			generated_interface: ToTypescript(Employees{}, Interface{Name: "EmployeeInterface", ArrayTypeName: "MyArrayOfEmployees"}),
+			generated_interface: Convert(Employees{}, Type{Name: "EmployeeInterface", ArrayTypeName: "MyArrayOfEmployees"}),
 			// Use custom array type name, if it's provided
 			expected_interface: `
 			export type MyArrayOfEmployees = EmployeeInterface[]

@@ -11,9 +11,9 @@ import (
 func main() {
 
 	// define which structs you want to convert
-	ex1 := gut.ToTypescript(User{})
-	ex2 := gut.ToTypescript(Comments{})
-	ex3 := gut.ToTypescript(MyRandomStruct{})
+	ex1 := gut.Convert(User{})
+	ex2 := gut.Convert(Comments{})
+	ex3 := gut.Convert(MyRandomStruct{})
 
 	// concat all of the interfaces together
 	interfaces := fmt.Sprintln(ex1, ex2, ex3)
